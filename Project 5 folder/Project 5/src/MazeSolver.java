@@ -68,7 +68,6 @@ public class MazeSolver {
 			String dimension = read.nextLine();
 			String separate [] = dimension.split(" ");
 			char [][] maze = new char [Integer.parseInt(separate[1])] [Integer.parseInt(separate[0])];
-			//System.out.println(Integer.parseInt(separate[1]) + " " + Integer.parseInt(separate[0]));
 			int row = 0;
 			do {
 				//read in the maze from each line
@@ -78,7 +77,7 @@ public class MazeSolver {
 					maze [col][row] = mazeLine.charAt(col);
 					System.out.print(maze [col][row]);
 				}
-				System.out.println("k");
+				System.out.println("");
 				row ++;
 
 			} while (read.hasNext());
@@ -87,9 +86,9 @@ public class MazeSolver {
 			System.out.println("(Enter 1 for DFS, 2 for BFS)");
 			int method = CheckInput.checkInt(1, 2);
 			if (method == 1) {
-				solverDFS (maze, Integer.parseInt(separate[1]), Integer.parseInt(separate[0]) );
+				solverDFS (maze, Integer.parseInt(separate[1]), Integer.parseInt(separate[0]));
 			} else {
-				solverBFS (maze);
+				solverBFS (maze, Integer.parseInt(separate[1]), Integer.parseInt(separate[0]));
 			}
 		} catch (FileNotFoundException n) {
 			System.out.println("File not found.");
@@ -101,13 +100,9 @@ public class MazeSolver {
 	 * @param maze the 2d array that contains the maze
 	 */
 	public static void solverDFS (char [][] maze, int mazeCol, int mazeRow) {
-		for (int col = 0; col < mazeCol; col ++) {
-			for (int row = 0; row < mazeRow; row ++) {
-				System.out.print(maze[col][row] + " ");
-			}
-			System.out.println("");
-		}
+
 		LinkedStack stack = new LinkedStack();
+		
 		boolean foundStart = false;
 		char wall = '*';//wall symbol
 		char path = '.';//put a path to the maze
@@ -118,7 +113,7 @@ public class MazeSolver {
 					Point pt = new Point (col, row);
 					stack.push(pt);
 					//print out the start point
-					System.out.println(pt);
+					//System.out.println(pt);
 					foundStart = true;
 				}
 			}
@@ -126,93 +121,147 @@ public class MazeSolver {
 
 		//Maze solving algorithm
 		boolean endMaze = false;
-		int count = 3;
-		//while (!stack.isEmpty() && !endMaze) {
-		while (count < 100 && !endMaze){
+		while (!stack.isEmpty() && !endMaze) {
 			//remove the top point from the stack
 			Point removePt = new Point (0, 0);
 			removePt = stack.pop();
-			int x = (int) removePt.getX();//col
-			int y = (int) removePt.getY();//row
-			
-			System.out.println("removed point: " + removePt);
-			
+			int x = (int) removePt.getX();//row
+			int y = (int) removePt.getY();//col
+
+			//System.out.println("removed point: " + removePt);
+
 			//check if it is the finish point
-			if (maze [x][y] == 'f') {
+			if (maze [y][x] == 'f') {
 				//print out the maze
-				for (int col = 0; col < mazeCol; col ++) {
-					for (int row = 0; row < mazeRow; row ++) {
+				for (int row = 0; row < mazeRow; row ++) {
+					for (int col = 0; col < mazeCol; col ++) {
 						System.out.print(maze [col][row]);
 					}
-				System.out.println("");
-				endMaze = true;
+					System.out.println("");
+					endMaze = true;
 				}
 			} else {
 				//Mark the spot in the maze as evaluated
-				maze [x][y] = path;
-				
-				//System.out.println("Path point: " + x + " " + y + " " + maze [y][x] );
-				
-				int leftC = x - 1;
-				int rightC = x + 1;
-				int upR = y - 1;
-				int downR = y + 1;
+				maze [y][x] = path;
 
+				int leftC = y - 1;
+				int rightC = y + 1;
+				int upR = x - 1;
+				int downR = x + 1;
+
+				//mark the path whenever there is not a wall
 				//check if they are within the range
 				if (leftC >= 0){ 
-					if (maze [leftC][y] != wall && maze [leftC][y] != path) {
-						//stack.push(new Point (x, left));
-						
-						stack.push(new Point (leftC, y));
-
-						System.out.println("left " + leftC + " " + y);
+					if (maze [leftC][x] != wall && maze [leftC][x] != path) {						
+						stack.push(new Point (x, leftC));
+						//System.out.println("left pt " + x + " " + leftC);
 					} 
 				}
 				if (rightC < mazeCol) {
-					//maze [right][x] = replacement;
-					if (maze [rightC][y] != wall && maze [rightC][y] != path) {
-						//stack.push(new Point (x, right));
-						
-						stack.push(new Point (rightC, y));
-
-						System.out.println("right " + rightC + " " + y);
-
+					if (maze [rightC][x] != wall && maze [rightC][x] != path) {
+						stack.push(new Point (x, rightC));
+						//System.out.println("right " + x + " " + rightC);
 					} 		
 				}
 				if (upR >=0) {
 					//maze [y][up] = replacement;
-					if (maze [x][upR] != wall && maze [x][upR] != path) {
-						//stack.push(new Point (up, y));
-						
-						stack.push(new Point (x, upR));
-
-						System.out.println("up " + x + " " + upR);
-
+					if (maze [y][upR] != wall && maze [y][upR] != path) {
+						stack.push(new Point (upR, y));
+						//System.out.println("up " + upR + " " + y);
 					} 
 				}
 				if (downR < mazeCol) {
-					//maze [y][down] = replacement;
-					if (maze [x][downR] != wall && maze [x][downR] != path) {
-						//stack.push(new Point (down, y));
-						
-						stack.push(new Point (x, downR));
-
-						System.out.println("down " + x + " " + downR);
+					if (maze [y][downR] != wall && maze [y][downR] != path) {
+						stack.push(new Point (downR, y));
+						//System.out.println("down " + downR + " " + x);
 					} 
 				}
-				System.out.println("done " + stack.size());
-
-			}
-			count ++;
-			
-		}
+			}//end of else			
+		}//end of big while loop
 	}
 
 	/**
 	 * solves the puzzle with BFS (queue)
 	 * @param maze the 2d array that contains the maze
 	 */
-	public static void solverBFS (char [][] maze) {
+	public static void solverBFS (char [][] maze, int mazeCol, int mazeRow) {
 		LinkedQueue queue = new LinkedQueue();
+		
+		boolean foundStart = false;
+		char wall = '*';//wall symbol
+		char path = '.';//put a path to the maze
+		
+		//find the starting position of the maze
+		for (int row = 0; row < mazeRow && !foundStart; row ++) {
+			for (int col = 0; col < mazeCol && !foundStart; col ++) {
+				if (maze [col][row] == 's') {
+					Point pt = new Point (col, row);
+					queue.add(pt);
+					//print out the start point
+					//System.out.println(pt);
+					foundStart = true;
+				}
+			}
+		}//end of search for 's'
+
+		//Maze solving algorithm
+		boolean endMaze = false;
+		while (!queue.isEmpty() && !endMaze) {
+			//remove the top point from the stack
+			Point removePt = new Point (0, 0);
+			removePt = queue.remove();
+			int x = (int) removePt.getX();//row
+			int y = (int) removePt.getY();//col
+
+			//System.out.println("removed point: " + removePt);
+
+			//check if it is the finish point
+			if (maze [y][x] == 'f') {
+				//print out the maze
+				for (int row = 0; row < mazeRow; row ++) {
+					for (int col = 0; col < mazeCol; col ++) {
+						System.out.print(maze [col][row]);
+					}
+					System.out.println("");
+					endMaze = true;
+				}
+			} else {
+				//Mark the spot in the maze as evaluated
+				maze [y][x] = path;
+
+				int leftC = y - 1;
+				int rightC = y + 1;
+				int upR = x - 1;
+				int downR = x + 1;
+
+				//mark the path whenever there is not a wall
+				//check if they are within the range
+				if (leftC >= 0){ 
+					if (maze [leftC][x] != wall && maze [leftC][x] != path) {						
+						queue.add(new Point (x, leftC));
+						//System.out.println("left pt " + x + " " + leftC);
+					} 
+				}
+				if (rightC < mazeCol) {
+					if (maze [rightC][x] != wall && maze [rightC][x] != path) {
+						queue.add(new Point (x, rightC));
+						//System.out.println("right " + x + " " + rightC);
+					} 		
+				}
+				if (upR >=0) {
+					//maze [y][up] = replacement;
+					if (maze [y][upR] != wall && maze [y][upR] != path) {
+						queue.add(new Point (upR, y));
+						//System.out.println("up " + upR + " " + y);
+					} 
+				}
+				if (downR < mazeCol) {
+					if (maze [y][downR] != wall && maze [y][downR] != path) {
+						queue.add(new Point (downR, y));
+						//System.out.println("down " + downR + " " + x);
+					} 
+				}
+			}//end of else		
+		}//end of big while loop
 	}
 }
